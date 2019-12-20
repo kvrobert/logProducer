@@ -1,10 +1,27 @@
+buildscript {
+    ext {
+        springBootVersion = '2.1.7.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath('gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.20.1')
+    }
+}
+
 plugins {
     id 'org.springframework.boot' version '2.2.2.RELEASE'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'java'
 }
 
-group = 'com.precognox'
+apply plugin: 'idea'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'com.palantir.docker'
+
+group = 'tas-logstreaming'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
@@ -29,4 +46,11 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+docker {
+    dependsOn build
+    name "${docker_registry_url}/${project.group}/${rootProject.name}:${rootProject.version}"
+    files bootJar.archivePath
+    buildArgs(['JAR_FILE': "${bootJar.archiveName}"])
 }
